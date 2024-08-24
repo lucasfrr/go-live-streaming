@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"lf/goLiveStreaming/internal/model"
 
 	"github.com/labstack/gommon/log"
@@ -25,6 +26,7 @@ func NeyKeyRepository(db *sql.DB) IKeysRepository {
 }
 
 func (kr *keysRepository) FindStreamKey(name, key string) (*model.Keys, error) {
+	fmt.Println("=========== LOOKING FOR:", name, key, "===========")
 	keys := &model.Keys{}
 	row := kr.QueryRow(`SELECT * FROM "Lives" WHERE "name"=$1 AND "stream_key"=$2`, name, key)
 
