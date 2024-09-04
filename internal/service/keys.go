@@ -5,15 +5,15 @@ import (
 	"lf/goLiveStreaming/internal/repository"
 )
 
-type IKeyService interface {
+type KeyService interface {
 	AuthStreamingKey(name, key string) (*model.Keys, error)
 }
 
 type keyService struct {
-	keysRepository repository.IKeysRepository
+	keysRepository repository.KeysRepository
 }
 
-func NeyKeyService(repo repository.IKeysRepository) IKeyService {
+func NeyKeyService(repo repository.KeysRepository) KeyService {
 	return &keyService{
 		keysRepository: repo,
 	}

@@ -11,7 +11,7 @@ import (
 
 var ErrQuery = errors.New("error to find stream key")
 
-type IKeysRepository interface {
+type KeysRepository interface {
 	FindStreamKey(name, key string) (*model.Keys, error)
 }
 
@@ -19,7 +19,7 @@ type keysRepository struct {
 	*sql.DB
 }
 
-func NeyKeyRepository(db *sql.DB) IKeysRepository {
+func NeyKeyRepository(db *sql.DB) KeysRepository {
 	return &keysRepository{
 		db,
 	}

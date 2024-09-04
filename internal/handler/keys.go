@@ -12,32 +12,32 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type IKeysHandler interface {
+type KeysHandler interface {
 	AuthStreamingKey(ctx echo.Context) error
 }
 
 type keysHandler struct {
-	keysService service.IKeyService
+	keysService service.KeyService
 }
 
-func NewHandler(serv service.IKeyService) IKeysHandler {
+func NewHandler(s service.KeyService) KeysHandler {
 	return &keysHandler{
-		keysService: serv,
+		keysService: s,
 	}
 }
 
-func (kh *keysHandler) AuthStreamingKey(ctx echo.Context) error {
+func (h *keysHandler) AuthStreamingKey(ctx echo.Context) error {
 	log.Default().Println("Running auth...")
 	body := ctx.Request().Body
 	defer body.Close()
 
 	fields, _ := io.ReadAll(body)
-	passedKeyValue := getStreamKey(fields)
+	authValues := getKeyValues(fields)
 
-	keys, err := kh.keysService.AuthStreamingKey(passedKeyValue.Name, passedKeyValue.Key)
+	keys, err := h.keysService.AuthStreamingKey(authValues.Name, authValues.Key)
 
 	if err != nil {
-		return ctx.String(http.StatusBadRequest, "problem with stream key")
+		return ctx.JSON(http.StatusBadRequest, "Error finding key")
 	}
 
 	if keys.Key == "" {
@@ -51,7 +51,7 @@ func (kh *keysHandler) AuthStreamingKey(ctx echo.Context) error {
 	return ctx.Redirect(http.StatusFound, newStreamURL)
 }
 
-func getStreamKey(s []byte) model.Keys {
+func getKeyValues(s []byte) model.Keys {
 	var authValues model.Keys
 
 	pairs := strings.Split(string(s), "&")
