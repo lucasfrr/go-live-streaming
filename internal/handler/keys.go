@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"io"
 	"lf/goLiveStreaming/internal/model"
 	"lf/goLiveStreaming/internal/service"
@@ -39,12 +40,15 @@ func (kh *keysHandler) AuthStreamingKey(ctx echo.Context) error {
 		return ctx.String(http.StatusBadRequest, "problem with stream key")
 	}
 
-	if keys.Key != "" {
-		log.Default().Println("user authenticated")
-		return ctx.String(http.StatusOK, "OK")
+	if keys.Key == "" {
+		return ctx.String(http.StatusForbidden, "forbidden user")
 	}
 
-	return ctx.String(http.StatusForbidden, "forbidden")
+	log.Default().Println("user authenticated")
+
+	newStreamURL := fmt.Sprintf("rmtp://127.0.0.1:1935/hls-live/%s", keys.Name)
+	log.Default().Println("Redirecting to:", newStreamURL)
+	return ctx.Redirect(http.StatusFound, newStreamURL)
 }
 
 func getStreamKey(s []byte) model.Keys {
