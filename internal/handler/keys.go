@@ -20,7 +20,7 @@ type keysHandler struct {
 	keysService service.KeyService
 }
 
-func NewHandler(s service.KeyService) KeysHandler {
+func NewHandler(s service.KeyService) *keysHandler {
 	return &keysHandler{
 		keysService: s,
 	}
@@ -30,7 +30,6 @@ func (h *keysHandler) AuthStreamingKey(ctx echo.Context) error {
 	log.Default().Println("Running auth...")
 	body := ctx.Request().Body
 	defer body.Close()
-
 	fields, _ := io.ReadAll(body)
 	authValues := getKeyValues(fields)
 
@@ -41,19 +40,19 @@ func (h *keysHandler) AuthStreamingKey(ctx echo.Context) error {
 	}
 
 	if keys.Key == "" {
-		return ctx.String(http.StatusForbidden, "forbidden user")
+		log.Default().Println("Forbidden User")
+		return ctx.String(http.StatusForbidden, "")
 	}
 
-	log.Default().Println("user authenticated")
+	log.Default().Println("User authenticated")
 
-	newStreamURL := fmt.Sprintf("rmtp://127.0.0.1:1935/hls-live/%s", keys.Name)
+	newStreamURL := fmt.Sprintf("rtmp://127.0.0.1:1935/hls-live/%s", keys.Name)
 	log.Default().Println("Redirecting to:", newStreamURL)
 	return ctx.Redirect(http.StatusFound, newStreamURL)
 }
 
 func getKeyValues(s []byte) model.Keys {
 	var authValues model.Keys
-
 	pairs := strings.Split(string(s), "&")
 
 	for _, pair := range pairs {
